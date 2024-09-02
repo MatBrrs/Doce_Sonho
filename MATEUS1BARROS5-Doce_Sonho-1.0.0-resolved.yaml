@@ -1,0 +1,190 @@
+openapi: 3.0.3
+info:
+  title: Loja de Bolos e Doces API
+  description: API para gerenciar o catálogo de produtos de uma loja de bolos e doces.
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/MATEUS1BARROS5/Doce_Sonho/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: http://localhost:8080/v1
+  description: Servidor local para desenvolvimento
+paths:
+  /produtos:
+    get:
+      summary: Lista todos os produtos
+      description: Retorna uma lista de todos os bolos e doces disponíveis na loja.
+      responses:
+        "200":
+          description: Lista de produtos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Produto'
+              example:
+              - id: "12345"
+                nome: Bolo de Chocolate
+                descricao: Bolo de chocolate com cobertura de brigadeiro
+                preco: 29.99
+                categoria: bolo
+                disponivel: true
+              - id: "12346"
+                nome: Bolo de Morango
+                descricao: Bolo de morango com recheio de creme e cobertura de chantilly
+                preco: 34.99
+                categoria: bolo
+                disponivel: true
+              - id: "12347"
+                nome: Bolo de Cenoura
+                descricao: Bolo de cenoura com cobertura de chocolate
+                preco: 27.99
+                categoria: bolo
+                disponivel: true
+              - id: "12348"
+                nome: Bolo Red Velvet
+                descricao: Bolo Red Velvet com recheio de cream cheese
+                preco: 39.99
+                categoria: bolo
+                disponivel: true
+              - id: "12349"
+                nome: Bolo de Limão
+                descricao: Bolo de limão com glacê de limão
+                preco: 31.99
+                categoria: bolo
+                disponivel: true
+              - id: "12350"
+                nome: Bolo de Coco
+                descricao: Bolo de coco com cobertura de leite condensado e coco ralado
+                preco: 32.99
+                categoria: bolo
+                disponivel: true
+              - id: "12351"
+                nome: Bolo de Amêndoas
+                descricao: Bolo de amêndoas com cobertura de chocolate branco
+                preco: 37.99
+                categoria: bolo
+                disponivel: true
+              - id: "12352"
+                nome: Bolo de Maracujá
+                descricao: Bolo de maracujá com calda de maracujá
+                preco: 33.99
+                categoria: bolo
+                disponivel: true
+    post:
+      summary: Adiciona um novo produto
+      description: Adiciona um novo bolo ou doce ao catálogo da loja.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Produto'
+        required: true
+      responses:
+        "201":
+          description: Produto criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+  /produtos/{id}:
+    get:
+      summary: Obtém um produto pelo ID
+      description: Retorna detalhes de um produto específico usando seu ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID do produto
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Produto encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        "404":
+          description: Produto não encontrado
+    put:
+      summary: Atualiza um produto existente
+      description: Atualiza os detalhes de um bolo ou doce existente no catálogo.
+      parameters:
+      - name: id
+        in: path
+        description: ID do produto
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Produto'
+        required: true
+      responses:
+        "200":
+          description: Produto atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        "404":
+          description: Produto não encontrado
+    delete:
+      summary: Deleta um produto
+      description: Remove um bolo ou doce do catálogo usando seu ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID do produto
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Produto deletado com sucesso
+        "404":
+          description: Produto não encontrado
+components:
+  schemas:
+    Produto:
+      required:
+      - categoria
+      - disponivel
+      - nome
+      - preco
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do produto
+          example: "12345"
+        nome:
+          type: string
+          description: Nome do produto
+          example: Bolo de Chocolate
+        descricao:
+          type: string
+          description: Descrição do produto
+          example: Bolo de chocolate com cobertura de brigadeiro
+        preco:
+          type: number
+          description: Preço do produto
+          format: float
+          example: 29.99
+        categoria:
+          type: string
+          description: "Categoria do produto (e.g., bolo, doce)"
+          example: bolo
+        disponivel:
+          type: boolean
+          description: Indica se o produto está disponível em estoque
+          example: true
