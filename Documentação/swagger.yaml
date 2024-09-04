@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Loja de Bolos e Doces API
+  title: Loja de Bolos e Doces API 
   description: API para gerenciar o catálogo de produtos de uma loja de bolos e doces.
   version: 1.0.0
 servers:
