@@ -59,4 +59,5 @@ def deletar_produto(produto_id):
     produtos.remove(produto)
     return '', 204
 
-if __name
+if __name__ == '__main__':
+    app.run(debug=True)
