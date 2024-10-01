@@ -36,11 +36,18 @@ def adicionar_produto():
         novo_produto = request.json
         if not novo_produto.get('nome') or not novo_produto.get('preco') or not novo_produto.get('categoria'):
             return jsonify({"error": "Campos obrigatórios: nome, preco, categoria"}), 400
-        
-        execute_query('''
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
             INSERT INTO produtos (nome, descricao, preco, categoria, disponivel)
             VALUES (?, ?, ?, ?, ?)
-        ''', (novo_produto['nome'], novo_produto.get('descricao', ''), novo_produto['preco'], novo_produto['categoria'], novo_produto['disponivel']))
+        ''', (novo_produto['nome'], novo_produto.get('descricao', ''), novo_produto['preco'], novo_produto['categoria'], novo_produto.get('disponivel', True)))
+        conn.commit()
+        
+        # Obter o ID recém-criado
+        novo_produto['id'] = cursor.lastrowid
+        conn.close()
         
         return jsonify(novo_produto), 201
     except Exception as e:
@@ -64,7 +71,7 @@ def atualizar_produto(produto_id):
             UPDATE produtos
             SET nome = ?, descricao = ?, preco = ?, categoria = ?, disponivel = ?
             WHERE id = ?
-        ''', (dados_atualizados['nome'], dados_atualizados.get('descricao', ''), dados_atualizados['preco'], dados_atualizados['categoria'], dados_atualizados['disponivel'], produto_id))
+        ''', (dados_atualizados['nome'], dados_atualizados.get('descricao', ''), dados_atualizados['preco'], dados_atualizados['categoria'], dados_atualizados.get('disponivel', True), produto_id))
         
         return jsonify(dados_atualizados), 200
     except Exception as e:
@@ -73,12 +80,19 @@ def atualizar_produto(produto_id):
 @app.route('/v1/produtos/<int:produto_id>', methods=['DELETE'])
 def deletar_produto(produto_id):
     try:
-        resultado = execute_query('DELETE FROM produtos WHERE id = ?', (produto_id,))
-        if resultado:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM produtos WHERE id = ?', (produto_id,))
+        conn.commit()
+        conn.close()
+        
+        if cursor.rowcount > 0:
             return '', 204
-        return jsonify({"error": "Produto não encontrado"}), 404
+        else:
+            return jsonify({"error": "Produto não encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+
