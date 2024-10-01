@@ -95,4 +95,3 @@ def deletar_produto(produto_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
