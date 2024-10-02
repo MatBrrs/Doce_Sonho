@@ -92,6 +92,16 @@ def deletar_produto(produto_id):
             return jsonify({"error": "Produto não encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/v1/produtos/categoria/<string:categoria>', methods=['GET'])
+def buscar_por_categoria(categoria):
+    try:
+        produtos = execute_query('SELECT * FROM produtos WHERE categoria = ?', (categoria,))
+        return jsonify([dict(row) for row in produtos]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
