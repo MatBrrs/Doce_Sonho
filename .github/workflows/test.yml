@@ -27,4 +27,5 @@ jobs:
           pip install -r requirements.txt
           touch banco_de_dados.db
           sqlite3 banco_de_dados.db "CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, descricao TEXT, preco REAL, categoria TEXT, disponivel INTEGER);"
+          touch testes/__init__.py
           pytest testes
