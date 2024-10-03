@@ -1,6 +1,9 @@
-name: Run Tests Before Merge
+name: Run Flask API Tests
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -10,19 +13,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x' # Define a versão do Python que você está usando
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flask pytest
 
-    - name: Run tests
-      run: |
-        pytest
+      - name: Set up SQLite
+        run: |
+          sudo apt-get install sqlite3
+          touch banco_de_dados.db
+          sqlite3 banco_de_dados.db "CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, descricao TEXT, preco REAL, categoria TEXT, disponivel INTEGER);"
+
+      - name: Run tests
+        run: |
+          pytest
