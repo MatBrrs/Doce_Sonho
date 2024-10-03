@@ -25,13 +25,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install flask pytest
-
-      - name: Set up SQLite
-        run: |
           sudo apt-get install sqlite3
           touch banco_de_dados.db
           sqlite3 banco_de_dados.db "CREATE TABLE IF NOT EXISTS produtos (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, descricao TEXT, preco REAL, categoria TEXT, disponivel INTEGER);"
-
-      - name: Run tests
-        run: |
-          pytest /testes
+          pytest testes
