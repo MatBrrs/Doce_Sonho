@@ -1,4 +1,4 @@
-import sqlite3
+import SQLAlchemy
 
 DATABASE = 'banco_de_dados.db'
 

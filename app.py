@@ -1,32 +1,32 @@
 from flask import Flask, jsonify, request
-import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-DATABASE = 'banco_de_dados.db'
+# Configuração do banco de dados usando SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco_de_dados.db'  # Você pode trocar por outro banco, ex: PostgreSQL ou MySQL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+db = SQLAlchemy(app)
 
-def execute_query(query, params=(), fetchone=False):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(query, params)
-    if fetchone:
-        result = cursor.fetchone()
-    else:
-        result = cursor.fetchall()
-    conn.commit()
-    conn.close()
-    return result
+# Definição do modelo de produto
+class Produto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    descricao = db.Column(db.String(200), nullable=True)
+    preco = db.Column(db.Float, nullable=False)
+    categoria = db.Column(db.String(50), nullable=False)
+    disponivel = db.Column(db.Boolean, default=True)
+
+# Criar todas as tabelas
+with app.app_context():
+    db.create_all()
 
 @app.route('/v1/produtos', methods=['GET'])
 def listar_produtos():
     try:
-        produtos = execute_query('SELECT * FROM produtos')
-        return jsonify([dict(row) for row in produtos]), 200
+        produtos = Produto.query.all()
+        return jsonify([produto_to_dict(produto) for produto in produtos]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -37,28 +37,26 @@ def adicionar_produto():
         if not novo_produto.get('nome') or not novo_produto.get('preco') or not novo_produto.get('categoria'):
             return jsonify({"error": "Campos obrigatórios: nome, preco, categoria"}), 400
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO produtos (nome, descricao, preco, categoria, disponivel)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (novo_produto['nome'], novo_produto.get('descricao', ''), novo_produto['preco'], novo_produto['categoria'], novo_produto.get('disponivel', True)))
-        conn.commit()
+        produto = Produto(
+            nome=novo_produto['nome'],
+            descricao=novo_produto.get('descricao', ''),
+            preco=novo_produto['preco'],
+            categoria=novo_produto['categoria'],
+            disponivel=novo_produto.get('disponivel', True)
+        )
+        db.session.add(produto)
+        db.session.commit()
         
-        # Obter o ID recém-criado
-        novo_produto['id'] = cursor.lastrowid
-        conn.close()
-        
-        return jsonify(novo_produto), 201
+        return jsonify(produto_to_dict(produto)), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/v1/produtos/<int:produto_id>', methods=['GET'])
 def obter_produto(produto_id):
     try:
-        produto = execute_query('SELECT * FROM produtos WHERE id = ?', (produto_id,), fetchone=True)
+        produto = Produto.query.get(produto_id)
         if produto:
-            return jsonify(dict(produto)), 200
+            return jsonify(produto_to_dict(produto)), 200
         return jsonify({"error": "Produto não encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -67,42 +65,52 @@ def obter_produto(produto_id):
 def atualizar_produto(produto_id):
     try:
         dados_atualizados = request.json
-        execute_query('''
-            UPDATE produtos
-            SET nome = ?, descricao = ?, preco = ?, categoria = ?, disponivel = ?
-            WHERE id = ?
-        ''', (dados_atualizados['nome'], dados_atualizados.get('descricao', ''), dados_atualizados['preco'], dados_atualizados['categoria'], dados_atualizados.get('disponivel', True), produto_id))
-        
-        return jsonify(dados_atualizados), 200
+        produto = Produto.query.get(produto_id)
+
+        if produto:
+            produto.nome = dados_atualizados['nome']
+            produto.descricao = dados_atualizados.get('descricao', '')
+            produto.preco = dados_atualizados['preco']
+            produto.categoria = dados_atualizados['categoria']
+            produto.disponivel = dados_atualizados.get('disponivel', True)
+            
+            db.session.commit()
+
+            return jsonify(produto_to_dict(produto)), 200
+        return jsonify({"error": "Produto não encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/v1/produtos/<int:produto_id>', methods=['DELETE'])
 def deletar_produto(produto_id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM produtos WHERE id = ?', (produto_id,))
-        conn.commit()
-        conn.close()
-        
-        if cursor.rowcount > 0:
+        produto = Produto.query.get(produto_id)
+        if produto:
+            db.session.delete(produto)
+            db.session.commit()
             return '', 204
-        else:
-            return jsonify({"error": "Produto não encontrado"}), 404
+        return jsonify({"error": "Produto não encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @app.route('/v1/produtos/categoria/<string:categoria>', methods=['GET'])
 def buscar_por_categoria(categoria):
     try:
-        produtos = execute_query('SELECT * FROM produtos WHERE categoria = ?', (categoria,))
-        return jsonify([dict(row) for row in produtos]), 200
+        produtos = Produto.query.filter_by(categoria=categoria).all()
+        return jsonify([produto_to_dict(produto) for produto in produtos]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Função auxiliar para converter o objeto Produto em dicionário
+def produto_to_dict(produto):
+    return {
+        'id': produto.id,
+        'nome': produto.nome,
+        'descricao': produto.descricao,
+        'preco': produto.preco,
+        'categoria': produto.categoria,
+        'disponivel': produto.disponivel
+    }
 
 if __name__ == '__main__':
     app.run(debug=True)
-    #espero que de certo
-
