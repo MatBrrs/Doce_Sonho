@@ -1,10 +1,14 @@
+import os
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Configuração do banco de dados usando SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco_de_dados.db'  # Você pode trocar por outro banco, ex: PostgreSQL ou MySQL
+# Verifique se está em teste para usar um banco de dados em memória
+if os.getenv('TESTING'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco_de_dados.db'  # Para produção
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)

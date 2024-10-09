@@ -1,23 +1,27 @@
-import SQLAlchemy
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
-DATABASE = 'banco_de_dados.db'
+# Configuração do aplicativo Flask e do banco de dados
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco_de_dados.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Definição do modelo de produto
+class Produto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    descricao = db.Column(db.String(200), nullable=True)
+    preco = db.Column(db.Float, nullable=False)
+    categoria = db.Column(db.String(50), nullable=False)
+    disponivel = db.Column(db.Boolean, default=True)
 
 def criar_tabela():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS produtos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            descricao TEXT,
-            preco REAL NOT NULL,
-            categoria TEXT NOT NULL,
-            disponivel BOOLEAN NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    # Criar todas as tabelas
+    with app.app_context():
+        db.create_all()  # Isso cria todas as tabelas definidas pelos modelos
+        print("Tabela 'produtos' criada com sucesso.")
 
 if __name__ == '__main__':
     criar_tabela()
-    print("Tabela 'produtos' criada com sucesso.")
