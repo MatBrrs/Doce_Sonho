@@ -6,9 +6,13 @@ app = Flask(__name__)
 
 # Verifique se está em teste para usar um banco de dados em memória
 if os.getenv('TESTING'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Para testes
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco_de_dados.db'  # Para produção
+    # Configure a conexão com um banco de dados PostgreSQL remoto
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        'postgresql://mateus:Qe#Xv}ql2?L37ibp@34.79.51.239:5432/programma-me-lab01:europe-west1:mentoria-lab'
+    )  # Substitua pelos detalhes do seu banco de dados
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
