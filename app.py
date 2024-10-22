@@ -10,7 +10,7 @@ if os.getenv('TESTING'):
 else:
     # Configure a conexão com um banco de dados PostgreSQL remoto
     app.config['SQLALCHEMY_DATABASE_URI'] = (
-        'postgresql://mateus:Qe#Xv}ql2?L37ibp@34.79.51.239:5432/programma-me-lab01:europe-west1:mentoria-lab'
+        "mysql+pymysql://mateus:Qe#Xv}ql2?L37ibp@34.79.51.239:3306/mateus_schema"
     )  # Substitua pelos detalhes do seu banco de dados
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
