@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+
+# Virtual environment
+env/
+venv/
+ENV/
+*.egg-info/
+
+# Docker
+*.dockerignore
+docker-compose.yml
+Dockerfile
+
+# Logs
+*.log
+*.out
+*.pid
+
+# Config files
+config.yaml
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Byte-compiled files
+*.pyc
+
+# Testing
+coverage/
+.tox/
+.pytest_cache/
+.cache/
