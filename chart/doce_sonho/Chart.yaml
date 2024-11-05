@@ -1,0 +1,5 @@
+apiVersion: v2
+name: doce-sonho-chart
+description: Chart para o deploy da API Doce Sonho
+version: 1.0.0
+
